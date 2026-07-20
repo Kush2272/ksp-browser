@@ -1,3 +1,9 @@
+export * from './browserStore';
+export * from './gatewayStore';
+export * from './historyStore';
+export * from './networkStore';
+export * from './inspectorStore';
+
 import { create } from 'zustand';
 
 // ---------------------------------------------------------
@@ -33,10 +39,8 @@ export const useTabStore = create<TabState>((set, get) => ({
   closeTab: (id) => set((state) => {
     const newTabs = state.tabs.filter(t => t.id !== id);
     if (newTabs.length === 0) {
-      // Always keep at least one tab
       newTabs.push({ id: '1', url: 'ksp://start', title: 'New Tab', isLoading: false, isActive: true });
     } else if (state.tabs.find(t => t.id === id)?.isActive) {
-      // If we closed the active tab, make the last one active
       newTabs[newTabs.length - 1].isActive = true;
     }
     return { tabs: newTabs };
