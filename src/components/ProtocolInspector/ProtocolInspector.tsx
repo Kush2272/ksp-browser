@@ -1,4 +1,3 @@
-import React from 'react';
 import { useInspectorStore } from '../../store/inspectorStore';
 import { Play, Square, Download, RotateCcw, Lock, Unlock, Network, Database } from 'lucide-react';
 

@@ -1,12 +1,11 @@
-import React from 'react';
 import { useTabStore } from '../store';
 import { Plus, X, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export function TabBar() {
-  const { tabs, addTab, closeTab, setActiveTab, getActiveTab } = useTabStore();
+  const { tabs, addTab, closeTab, setActiveTab } = useTabStore();
 
   return (
-    <div className="flex items-center h-10 bg-zinc-900 border-b border-zinc-800 text-sm select-none" data-tauri-drag-region>
+    <div className="flex items-center h-10 bg-[#16181c] border-b border-[#252830] text-sm select-none" data-tauri-drag-region>
       <div className="flex-1 flex overflow-x-auto overflow-y-hidden hide-scrollbar items-end h-full px-2 gap-1 pt-1">
         {tabs.map((tab) => {
           const isActive = tab.isActive;
@@ -19,13 +18,13 @@ export function TabBar() {
               className={`
                 group flex items-center h-full min-w-[150px] max-w-[240px] px-3 gap-2 rounded-t-md cursor-pointer transition-colors border border-b-0
                 ${isActive 
-                  ? 'bg-zinc-800 text-zinc-100 border-zinc-700/50' 
+                  ? 'bg-[#0d0e10] text-zinc-100 border-[#252830]' 
                   : 'bg-transparent text-zinc-400 border-transparent hover:bg-zinc-800/50 hover:text-zinc-300'}
               `}
             >
               <div className="flex-shrink-0">
                 {isKsp ? (
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4 text-amber-400" />
                 ) : (
                   <ShieldAlert className="w-4 h-4 text-zinc-500" />
                 )}
