@@ -1,12 +1,18 @@
 import React from 'react';
 import { useTabStore } from '../store';
 import { Activity } from 'lucide-react';
+import { ProtocolInspector } from './ProtocolInspector/ProtocolInspector';
 
 export function Viewport() {
   const { getActiveTab } = useTabStore();
   const activeTab = getActiveTab();
 
   if (!activeTab) return null;
+
+  // Internal routing for KSP Browser native pages
+  if (activeTab.url === 'ksp://protocol') {
+    return <ProtocolInspector />;
+  }
 
   return (
     <div className="flex-1 bg-zinc-950 flex flex-col relative overflow-hidden">
@@ -33,6 +39,12 @@ export function Viewport() {
           <span className="text-sm font-mono text-emerald-400 truncate ml-4">{activeTab.url}</span>
         </div>
         
+        <div className="mt-12 text-zinc-500 text-sm">
+          Try visiting <button onClick={() => {
+            const { updateTab } = useTabStore.getState();
+            updateTab(activeTab.id, { url: 'ksp://protocol', title: 'Protocol Inspector' });
+          }} className="text-emerald-400 hover:underline">ksp://protocol</button> to see the Protocol Inspector.
+        </div>
       </div>
     </div>
   );
