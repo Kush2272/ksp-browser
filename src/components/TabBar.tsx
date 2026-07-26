@@ -44,16 +44,14 @@ export function TabBar() {
             </div>
           );
         })}
-
-        {/* Plus button attached directly next to the last tab */}
-        <button 
-          onClick={() => addTab()}
-          title="New Tab"
-          className="mb-1 p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
       </div>
+      
+      <button 
+        onClick={() => addTab()}
+        className="mx-2 p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+      </button>
     </div>
   );
 }

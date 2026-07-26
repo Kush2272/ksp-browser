@@ -22,7 +22,6 @@ uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 tracing = "0.1"
 rusqlite = { version = "0.32", features = ["bundled"] }
-url = "2"
 
 # KSP dependencies
 ksp-core = { path = "../../ksp/crates/ksp-core" }
