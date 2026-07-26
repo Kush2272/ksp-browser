@@ -1,22 +1,22 @@
-import { Shield, Search, ExternalLink, Activity, Layers, Code, Terminal, FileText, Cpu } from 'lucide-react';
+import { Shield, Search, ExternalLink, Activity, Layers, Code, FileText, Cpu } from 'lucide-react';
 import { useTabStore } from '../store';
 
 export function Home() {
-  const { getActiveTab, updateTab, addTab } = useTabStore();
+  const { getActiveTab, navigate, addTab } = useTabStore();
   const activeTab = getActiveTab();
 
   const developerShortcuts = [
-    { name: 'GitHub', url: 'https://github.com', icon: Code },
-    { name: 'StackOverflow', url: 'https://stackoverflow.com', icon: Terminal },
-    { name: 'Rust Docs', url: 'https://doc.rust-lang.org', icon: Cpu },
     { name: 'MDN Web Docs', url: 'https://developer.mozilla.org', icon: FileText },
+    { name: 'Rust Docs', url: 'https://doc.rust-lang.org', icon: Cpu },
     { name: 'crates.io', url: 'https://crates.io', icon: Layers },
+    { name: 'Wikipedia', url: 'https://wikipedia.org', icon: Search },
     { name: 'Protocol Inspector', url: 'ksp://protocol', icon: Activity },
+    { name: 'Gateway', url: 'ksp://gateway', icon: Code },
   ];
 
   const navigateTo = (url: string, title: string) => {
     if (activeTab) {
-      updateTab(activeTab.id, { url, title });
+      navigate(activeTab.id, url, title);
     } else {
       addTab(url);
     }
@@ -94,12 +94,12 @@ export function Home() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono text-zinc-300">
               <div className="p-3 bg-[#1f2228] rounded-xl border border-[#252830]">
-                <div className="text-zinc-500 text-[10px] uppercase">Listener</div>
+                <div className="text-zinc-500 text-[10px] uppercase">KSP Listener</div>
                 <div className="text-white font-bold mt-0.5">127.0.0.1:8765</div>
               </div>
               <div className="p-3 bg-[#1f2228] rounded-xl border border-[#252830]">
-                <div className="text-zinc-500 text-[10px] uppercase">Latency</div>
-                <div className="text-emerald-400 font-bold mt-0.5">2.1 ms</div>
+                <div className="text-zinc-500 text-[10px] uppercase">Dashboard</div>
+                <div className="text-emerald-400 font-bold mt-0.5">:9090</div>
               </div>
             </div>
           </div>

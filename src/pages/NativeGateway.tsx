@@ -3,36 +3,37 @@ import { Layers, Activity, RefreshCw, Server, Clock, HardDrive } from 'lucide-re
 
 export function NativeGateway() {
   const [stats, setStats] = useState<any>({
-    active_sessions: 3,
-    uptime_secs: 1420,
-    version: '0.1.0',
-    bandwidth_in_mb: 142.8,
-    bandwidth_out_mb: 38.4,
-    cache_hit_percent: 74.2,
+    active_sessions: 0,
+    uptime_secs: 0,
+    version: 'unknown',
   });
 
-  const [sessions, setSessions] = useState<any[]>([
-    { id: 'sess-8491', peer: '127.0.0.1:52140', connected_at: '2026-07-20T03:30:00Z', requests: 42, bytes_in: 104200, bytes_out: 412000 },
-    { id: 'sess-9120', peer: '127.0.0.1:52188', connected_at: '2026-07-20T03:41:12Z', requests: 18, bytes_in: 52100, bytes_out: 120400 },
-  ]);
+  const [sessions, setSessions] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchGatewayStats = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const res = await fetch('http://127.0.0.1:9090/api/stats');
       if (res.ok) {
         const data = await res.json();
-        setStats((prev: any) => ({ ...prev, ...data }));
+        setStats(data);
+      } else {
+        setError(`Gateway stats API error: ${res.status}`);
       }
       const sRes = await fetch('http://127.0.0.1:9090/api/sessions');
       if (sRes.ok) {
         const sData = await sRes.json();
         setSessions(sData);
+      } else {
+        setError(`Gateway sessions API error: ${sRes.status}`);
       }
     } catch (e) {
-      console.log('Gateway API offline or unreachable using mock stats');
+      setError(`Gateway connection error: ${e instanceof Error ? e.message : String(e)}`);
+      console.error('Failed to fetch gateway stats:', e);
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +48,7 @@ export function NativeGateway() {
   return (
     <div className="flex-1 bg-[#0d0e10] p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#252830] pb-5">
           <div className="flex items-center gap-3">
@@ -61,9 +62,13 @@ export function NativeGateway() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              GATEWAY ONLINE
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold ${
+              error
+                ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${error ? 'bg-red-400' : 'bg-emerald-400 animate-pulse'}`} />
+              {error ? 'GATEWAY OFFLINE' : 'GATEWAY ONLINE'}
             </div>
             <button
               onClick={fetchGatewayStats}
@@ -73,6 +78,15 @@ export function NativeGateway() {
             </button>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm">
+            <p className="font-semibold mb-1">Connection Error</p>
+            <p className="text-red-200/80">{error}</p>
+            <p className="text-red-200/60 text-xs mt-2">Ensure ksp-gateway is running: <code>cargo run --manifest-path ksp-gateway/Cargo.toml -- start</code></p>
+          </div>
+        )}
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-4 gap-4">
@@ -116,31 +130,37 @@ export function NativeGateway() {
         {/* Sessions Table */}
         <div className="bg-[#16181c] border border-[#252830] rounded-xl overflow-hidden space-y-4 p-5">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Active KSP Gateway Sessions</h3>
-          
-          <table className="w-full text-xs font-mono text-left">
-            <thead>
-              <tr className="border-b border-[#252830] text-zinc-500">
-                <th className="py-2.5 px-3 font-semibold">SESSION ID</th>
-                <th className="py-2.5 px-3 font-semibold">PEER ADDRESS</th>
-                <th className="py-2.5 px-3 font-semibold">CONNECTED AT</th>
-                <th className="py-2.5 px-3 font-semibold">REQUESTS</th>
-                <th className="py-2.5 px-3 font-semibold">BYTES IN</th>
-                <th className="py-2.5 px-3 font-semibold">BYTES OUT</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#252830]/50 text-zinc-200">
-              {sessions.map((s) => (
-                <tr key={s.id} className="hover:bg-[#1f2228]/50 transition-colors">
-                  <td className="py-3 px-3 text-amber-400">{s.id}</td>
-                  <td className="py-3 px-3">{s.peer}</td>
-                  <td className="py-3 px-3 text-zinc-400">{new Date(s.connected_at).toLocaleTimeString()}</td>
-                  <td className="py-3 px-3 font-bold text-white">{s.requests}</td>
-                  <td className="py-3 px-3 text-emerald-400">{(s.bytes_in / 1024).toFixed(1)} KB</td>
-                  <td className="py-3 px-3 text-cyan-400">{(s.bytes_out / 1024).toFixed(1)} KB</td>
+
+          {sessions.length === 0 ? (
+            <div className="py-8 text-center text-zinc-400 text-sm">
+              {error ? 'Unable to load sessions' : 'No active sessions'}
+            </div>
+          ) : (
+            <table className="w-full text-xs font-mono text-left">
+              <thead>
+                <tr className="border-b border-[#252830] text-zinc-500">
+                  <th className="py-2.5 px-3 font-semibold">SESSION ID</th>
+                  <th className="py-2.5 px-3 font-semibold">PEER ADDRESS</th>
+                  <th className="py-2.5 px-3 font-semibold">CONNECTED AT</th>
+                  <th className="py-2.5 px-3 font-semibold">REQUESTS</th>
+                  <th className="py-2.5 px-3 font-semibold">BYTES IN</th>
+                  <th className="py-2.5 px-3 font-semibold">BYTES OUT</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#252830]/50 text-zinc-200">
+                {sessions.map((s) => (
+                  <tr key={s.id} className="hover:bg-[#1f2228]/50 transition-colors">
+                    <td className="py-3 px-3 text-amber-400">{s.id}</td>
+                    <td className="py-3 px-3">{s.peer}</td>
+                    <td className="py-3 px-3 text-zinc-400">{new Date(s.connected_at).toLocaleTimeString()}</td>
+                    <td className="py-3 px-3 font-bold text-white">{s.requests}</td>
+                    <td className="py-3 px-3 text-emerald-400">{(s.bytes_in / 1024).toFixed(1)} KB</td>
+                    <td className="py-3 px-3 text-cyan-400">{(s.bytes_out / 1024).toFixed(1)} KB</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
       </div>

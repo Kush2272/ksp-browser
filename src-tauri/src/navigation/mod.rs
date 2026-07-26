@@ -1,32 +1,23 @@
-pub mod context;
-pub mod parser;
-pub mod normalizer;
+//! Navigation module — address classification, search resolution, and
+//! security policy enforcement.
+//!
+//! The old 6-stage pipeline (`parse → normalize → history → route →
+//! permissions → context`) has been consolidated into three focused
+//! modules:
+//!
+//! - [`address_parser`] — single-pass classify + normalize + route
+//! - [`search_resolver`] — turn a search query + provider into a URL
+//! - [`security_policy`] — real allow/deny rules enforced at the Rust layer
+//!
+//! `history` recording is kept but will move to `BrowserService` in
+//! Phase 1/2 — it's not a navigation concern, it's a persistence concern.
+
+pub mod address_parser;
+pub mod search_resolver;
+pub mod security_policy;
 pub mod history;
-pub mod router;
-pub mod permissions;
 
-pub use context::NavigationContext;
-
-/// Process a raw input through the full 6-stage navigation pipeline.
-pub fn process_navigation(tab_id: &str, raw_input: &str) -> NavigationContext {
-    let mut ctx = NavigationContext::new(tab_id, raw_input);
-
-    // Stage 1: Parse
-    let parsed = parser::parse_input(&ctx.raw_input);
-    
-    // Stage 2: Normalize
-    let normalized = normalizer::normalize_url(&parsed);
-    ctx.parsed_url = normalized;
-
-    // Stage 3: Record History
-    history::record_history(&ctx.tab_id, &ctx.parsed_url);
-
-    // Stage 4: Route Classification
-    let target = router::route_target(&ctx.parsed_url);
-    ctx.target_kind = format!("{:?}", target);
-
-    // Stage 5: Permissions Check
-    ctx.allowed = permissions::check_permissions(&ctx.parsed_url);
-
-    ctx
-}
+// Re-exports for ergonomic access.
+pub use address_parser::{classify, AddressClassification, TargetKind, ProtocolFamily};
+pub use search_resolver::SearchProvider;
+pub use security_policy::{check as check_security, PolicyDecision};

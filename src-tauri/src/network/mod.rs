@@ -1,6 +1,8 @@
 pub mod capabilities;
 pub mod gateway_client;
 pub mod connection_manager;
+pub mod tunnel;
+pub mod kspweb;
 
 pub use capabilities::GatewayCapabilities;
 pub use gateway_client::GatewayClient;

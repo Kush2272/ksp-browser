@@ -2209,6 +2209,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tokio",
  "tracing",
+ "url",
  "uuid",
 ]
 

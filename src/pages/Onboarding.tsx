@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Shield, Lock, Search, Code, Globe, GraduationCap, BookOpen, Layers, Check, ArrowRight } from 'lucide-react';
-import { useTabStore } from '../store';
+import { useTabStore, useSettingsStore } from '../store';
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -8,18 +8,36 @@ interface OnboardingProps {
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const [step, setStep] = useState(1);
-  const [selectedSearch, setSelectedSearch] = useState('duckduckgo');
+  const [selectedSearch, setSelectedSearch] = useState('google');
   const [selectedProfile, setSelectedProfile] = useState('developer');
   const [gatewayChoice, setGatewayChoice] = useState('local');
 
   const { addTab, getActiveTab, updateTab } = useTabStore();
+  const { setSearchEngine, setStartUrl } = useSettingsStore();
 
   const handleFinish = () => {
+    let targetUrl = 'https://www.google.com';
+    let targetTitle = 'Google';
+
+    if (selectedSearch === 'duckduckgo') {
+      targetUrl = 'https://duckduckgo.com';
+      targetTitle = 'DuckDuckGo';
+    } else if (selectedSearch === 'brave') {
+      targetUrl = 'https://search.brave.com';
+      targetTitle = 'Brave Search';
+    } else if (selectedSearch === 'ksp') {
+      targetUrl = 'ksp://home';
+      targetTitle = 'KSP Home';
+    }
+
+    setSearchEngine(selectedSearch);
+    setStartUrl(targetUrl);
+
     const activeTab = getActiveTab();
     if (activeTab) {
-      updateTab(activeTab.id, { url: 'ksp://home', title: 'KSP Home' });
+      updateTab(activeTab.id, { url: targetUrl, title: targetTitle });
     } else {
-      addTab('ksp://home');
+      addTab(targetUrl);
     }
     onComplete();
   };
@@ -83,15 +101,15 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
             <div>
               <h1 className="text-xl font-bold text-white">Select Default Search Engine</h1>
-              <p className="text-xs text-zinc-400 mt-1">Choose your preferred default search provider for omnibox queries.</p>
+              <p className="text-xs text-zinc-400 mt-1">Choose your preferred default search provider & homepage.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               {[
-                { id: 'duckduckgo', name: 'DuckDuckGo', desc: 'Privacy-focused search', icon: Shield },
-                { id: 'google', name: 'Google', desc: 'Standard global web search', icon: Search },
+                { id: 'google', name: 'Google', desc: 'Standard global web search & homepage', icon: Search },
+                { id: 'duckduckgo', name: 'DuckDuckGo', desc: 'Privacy-focused search engine', icon: Shield },
                 { id: 'brave', name: 'Brave Search', desc: 'Independent private index', icon: Lock },
-                { id: 'ksp', name: 'KSP Search', desc: 'Native KSP index (Experimental)', icon: Globe },
+                { id: 'ksp', name: 'KSP Home', desc: 'Native KSP Platform Dashboard', icon: Globe },
               ].map((engine) => {
                 const Icon = engine.icon;
                 const isSelected = selectedSearch === engine.id;
@@ -210,11 +228,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
             <h1 className="text-2xl font-bold text-white">KSP Browser Ready</h1>
             <p className="text-sm text-zinc-400 max-w-md mx-auto">
-              Your browser platform is configured with the <span className="text-amber-400 font-semibold uppercase">{selectedProfile}</span> profile template and connected to the gateway.
+              Your browser platform is configured with the <span className="text-amber-400 font-semibold uppercase">{selectedProfile}</span> profile template and launching <span className="text-amber-400 font-semibold capitalize">{selectedSearch}</span>.
             </p>
 
             <div className="p-4 bg-[#1f2228] border border-[#252830] rounded-xl text-left max-w-md mx-auto space-y-2 text-xs font-mono text-zinc-300">
-              <div>✓ Search Engine: <span className="text-white capitalize">{selectedSearch}</span></div>
+              <div>✓ Welcome Homepage: <span className="text-white capitalize">{selectedSearch}</span></div>
               <div>✓ Profile Mode: <span className="text-white capitalize">{selectedProfile}</span></div>
               <div>✓ Gateway Target: <span className="text-white">127.0.0.1:8765</span></div>
               <div>✓ Developer Tools: <span className="text-emerald-400">Enabled</span></div>
